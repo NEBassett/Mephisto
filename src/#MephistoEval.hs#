@@ -1,0 +1,12 @@
+module MephistoEval
+  (
+
+  ) where
+
+import MephistoTypes
+
+shift :: Int -> Term -> Term
+shift = recurse 0
+  where recurse :: Int -> Term -> Term
+        recurse n term = case term of
+                           Var n -> 
