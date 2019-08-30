@@ -16,7 +16,7 @@ import Control.Monad.Except
 
 data Atomic = MBool | MDouble | MString | MNat deriving (Eq)
 
-data Type = Base Atomic | Func Type Type | MTuple [Type]
+data Type = Base Atomic | Func Type Type | MTuple [Type] | Sum Type Type
 
 data Bind = Bound | Variable Type
 
@@ -49,6 +49,7 @@ eq :: Type -> Type -> Bool
 eq (Base a) (Base b) = a == b
 eq (Func a b) (Func c d) = (eq a c) && (eq b d)
 eq (MTuple a) (MTuple b) = fst $ foldr (\m (n, (l:ls)) -> (((eq m l) && n), ls)) (True, b) a
+eq (Sum a b) (Sum c d) = (eq a c) && (eq b d)
 eq _ _ = False
 
 crawlingShow :: Context -> Term -> String
@@ -74,7 +75,9 @@ showa MString = "String"
 showt :: Type -> String
 showt (Base a) = showa a
 showt (Func a b) = (showt a) ++ " -> " ++ (showt b)
-showt (MTuple ms) = "(" ++ (intercalate ", " (fmap showt ms)) ++ ")" 
+showt (MTuple ms) = "(" ++ (intercalate ", " (fmap showt ms)) ++ ")"
+showt (Sum a b) = (showt a) ++ " + " ++ (showt b)
+
 
 showe :: MError -> String
 showe (NoRule m) = "No evaluation rule for: " ++ (show m)
