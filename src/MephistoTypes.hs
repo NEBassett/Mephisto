@@ -11,11 +11,12 @@ module MephistoTypes
 
 import qualified Data.Map as M
 import qualified Control.Lens as L
+import Data.List
 import Control.Monad.Except
 
 data Atomic = MBool | MDouble | MString | MNat deriving (Eq)
 
-data Type = Base Atomic | Func Type Type
+data Type = Base Atomic | Func Type Type | MTuple [Type]
 
 data Bind = Bound | Variable Type
 
@@ -27,6 +28,8 @@ data Term = Var Int -- De Bruijn index
           | If Term Term Term
           | TTrue
           | TFalse
+          | TTuple [Term]
+          
 
 data MError = NoRule Term
             | BadPredicate Term
@@ -45,6 +48,7 @@ instance Eq Type where (==) = eq
 eq :: Type -> Type -> Bool
 eq (Base a) (Base b) = a == b
 eq (Func a b) (Func c d) = (eq a c) && (eq b d)
+eq (MTuple a) (MTuple b) = fst $ foldr (\m (n, (l:ls)) -> (((eq m l) && n), ls)) (True, b) a
 eq _ _ = False
 
 crawlingShow :: Context -> Term -> String
@@ -58,6 +62,7 @@ crawlingShow env (Var ind) = maybe ("bad index: " ++ show ind) (\a -> a) (fmap f
 crawlingShow env (App function argument) = "(" ++ (crawlingShow env function) ++ " " ++ (crawlingShow env argument) ++ ")"
 crawlingShow env TTrue = "true"
 crawlingShow env TFalse = "false"
+crawlingShow env (TTuple ms) = "(" ++ (intercalate ", " (fmap (crawlingShow env) ms)) ++ ")" 
 crawlingShow env (If a b c) = "If " ++ (crawlingShow env a) ++ " then " ++ (crawlingShow env b) ++ " else " ++ (crawlingShow env c)
 
 showa :: Atomic -> String
@@ -69,6 +74,7 @@ showa MString = "String"
 showt :: Type -> String
 showt (Base a) = showa a
 showt (Func a b) = (showt a) ++ " -> " ++ (showt b)
+showt (MTuple ms) = "(" ++ (intercalate ", " (fmap showt ms)) ++ ")" 
 
 showe :: MError -> String
 showe (NoRule m) = "No evaluation rule for: " ++ (show m)
