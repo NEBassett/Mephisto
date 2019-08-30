@@ -15,16 +15,16 @@ getType env ind = case (fmap snd (env L.^? (L.element ind))) of
     Variable typ -> return $ typ
 
 typeof :: Context -> Term -> ThrowsError Type
-typeof env TTrue = return $ Boolean
-typeof env TFalse = return $ Boolean
+typeof env TTrue = return $ (Base MBool)
+typeof env TFalse = return $ (Base MBool)
 typeof env (If a b c) = do
   anteType <- typeof env a
   case anteType of
-    Boolean -> do
+    (Base MBool) -> do
       consType <- typeof env b
       elseType <- typeof env c
       if (consType == elseType) then (return consType) else (throwError $ BadType consType elseType)
-    typ -> throwError $ BadType Boolean typ
+    typ -> throwError $ BadType (Base MBool) typ
 typeof env (Var n) = getType env n
 typeof env (Abs typ name term) = do
   resultType <- typeof ([(name, Variable typ)] ++ env) term

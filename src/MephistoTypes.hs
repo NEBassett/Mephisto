@@ -13,7 +13,7 @@ import qualified Data.Map as M
 import qualified Control.Lens as L
 import Control.Monad.Except
 
-data Atomic = MBool | MDouble | MString | MNat
+data Atomic = MBool | MDouble | MString | MNat deriving (Eq)
 
 data Type = Base Atomic | Func Type Type
 
@@ -39,10 +39,11 @@ type ThrowsError = Either MError
 instance Show Term where show = (crawlingShow [])
 instance Show Type where show = showt
 instance Show MError where show = showe
+instance Show Atomic where show = showa
 instance Eq Type where (==) = eq
 
 eq :: Type -> Type -> Bool
-eq Boolean Boolean = True
+eq (Base a) (Base b) = a == b
 eq (Func a b) (Func c d) = (eq a c) && (eq b d)
 eq _ _ = False
 
@@ -59,8 +60,14 @@ crawlingShow env TTrue = "true"
 crawlingShow env TFalse = "false"
 crawlingShow env (If a b c) = "If " ++ (crawlingShow env a) ++ " then " ++ (crawlingShow env b) ++ " else " ++ (crawlingShow env c)
 
+showa :: Atomic -> String
+showa MBool = "Bool"
+showa MNat = "Natural"
+showa MDouble = "Double"
+showa MString = "String" 
+
 showt :: Type -> String
-showt Boolean = "Bool"
+showt (Base a) = showa a
 showt (Func a b) = (showt a) ++ " -> " ++ (showt b)
 
 showe :: MError -> String
