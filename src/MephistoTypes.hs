@@ -5,14 +5,17 @@ module MephistoTypes
     ThrowsError(..),
     MError(..),
     Type(..),
-    Bind(..)
+    Bind(..),
+    Atomic(..)
   ) where
 
 import qualified Data.Map as M
 import qualified Control.Lens as L
 import Control.Monad.Except
 
-data Type = Boolean | Func Type Type
+data Atomic = MBool | MDouble | MString | MNat
+
+data Type = Base Atomic | Func Type Type
 
 data Bind = Bound | Variable Type
 
