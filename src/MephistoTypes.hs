@@ -6,7 +6,8 @@ module MephistoTypes
     MError(..),
     Type(..),
     Bind(..),
-    Atomic(..)
+    Atomic(..),
+    isInFv
   ) where
 
 import qualified Data.Map as M
@@ -16,7 +17,7 @@ import Control.Monad.Except
 
 data Atomic = MBool | MDouble | MString | MNat deriving (Eq)
 
-data Type = Base Atomic | Func Type Type | MTuple [Type] | Sum Type Type
+data Type = Base Atomic | Func Type Type | MTuple [Type] | Sum Type Type | TVar String
 
 data Bind = Bound | Variable Type
 
@@ -46,6 +47,7 @@ instance Show Atomic where show = showa
 instance Eq Type where (==) = eq
 
 eq :: Type -> Type -> Bool
+eq (TVar s) (TVar d) = s == d
 eq (Base a) (Base b) = a == b
 eq (Func a b) (Func c d) = (eq a c) && (eq b d)
 eq (MTuple a) (MTuple b) = fst $ foldr (\m (n, (l:ls)) -> (((eq m l) && n), ls)) (True, b) a
@@ -77,7 +79,7 @@ showt (Base a) = showa a
 showt (Func a b) = (showt a) ++ " -> " ++ (showt b)
 showt (MTuple ms) = "(" ++ (intercalate ", " (fmap showt ms)) ++ ")"
 showt (Sum a b) = (showt a) ++ " + " ++ (showt b)
-
+showt (TVar s) = s 
 
 showe :: MError -> String
 showe (NoRule m) = "No evaluation rule for: " ++ (show m)
@@ -89,3 +91,10 @@ showe (BadTypeMsg m s) = "Bad type, expected: " ++ s ++ ", got: " ++ (show m)
 getName :: Context -> (String, Bind) -> (String, Bind)
 getName env str = impl env str 0
   where impl env (str, val) n = if (any ((== str) . fst) env) then (impl env ((str ++ (show n), val)) (n+1)) else (str, val)
+
+isInFv :: String -> Type -> Bool
+isInFv s (Base _) = False
+isInFv s (Func m n) = (isInFv s m) || (isInFv s n)
+isInFv s (MTuple ms) = foldr ((||) . (isInFv s)) False ms
+isInFv s (Sum m n) = (isInFv s m) || (isInFv s n)
+isInFv s (TVar name) = s == name
