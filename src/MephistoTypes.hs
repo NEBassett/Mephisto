@@ -7,13 +7,17 @@ module MephistoTypes
     Type(..),
     Bind(..),
     Atomic(..),
+    Constraint(..),
     isInFv
   ) where
+
 
 import qualified Data.Map as M
 import qualified Control.Lens as L
 import Data.List
 import Control.Monad.Except
+
+data Constraint = Constraint Type Type
 
 data Atomic = MBool | MDouble | MString | MNat deriving (Eq)
 

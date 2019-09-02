@@ -7,8 +7,6 @@ module MephistoUnify
 import MephistoTypes
 import Data.Maybe
 
-data Constraint = Constraint Type Type
-
 subst :: [(Type, Type)] -> Type -> Type
 subst zs val@(TVar s) = fromMaybe val $ lookup val zs 
 subst zs (Func m n) = Func (subst zs m) (subst zs n)
@@ -30,7 +28,7 @@ unify ((Constraint s u):cs) =
   then ((:) (u,s) <$> (unify $ fmap (csubst [(u,s)]) cs))
   else if ((isFunc s) && (isFunc u))
   then (unify $ [Constraint (inputType s) (inputType u), Constraint (outputType s) (outputType u)] ++ cs)
-  else Nothing
+  else Nothing 
   where varS = isVar s
         varU = isVar u
         isFunc (Func t y) = True
