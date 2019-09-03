@@ -1,6 +1,7 @@
 module MephistoTypeCheck
   (
-    typeof
+    typeof,
+    constraints
   ) where
 
 import MephistoTypes

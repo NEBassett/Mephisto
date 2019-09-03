@@ -48,6 +48,7 @@ instance Show Term where show = (crawlingShow [])
 instance Show Type where show = showt
 instance Show MError where show = showe
 instance Show Atomic where show = showa
+instance Show Constraint where show = showc
 instance Eq Type where (==) = eq
 
 eq :: Type -> Type -> Bool
@@ -77,6 +78,9 @@ showa MBool = "Bool"
 showa MNat = "Natural"
 showa MDouble = "Double"
 showa MString = "String" 
+
+showc :: Constraint -> String
+showc (Constraint a b) = (show a) ++ " = " ++ (show b)
 
 showt :: Type -> String
 showt (Base a) = showa a
