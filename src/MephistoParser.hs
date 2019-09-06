@@ -44,15 +44,19 @@ pVar = do
 
 pIf :: MephistoParser Term
 pIf = do
-  try $ reserved "if" 
+  reserved "if" 
   cond <- pExpr
-  try $ reserved "then"
+  reserved "then"
   thenForm <- pExpr
-  try $ reserved "else"
+  eserved "else"
   elseForm <- pExpr
   return $ If cond thenForm elseForm
 
-
+pApp :: MephistoParser Term
+pApp = brackets $ do
+  func <- pExpr
+  arg <- pExpr
+  return $ App func arg
 
 pAbs :: MephistoParser Term
 pAbs = parens $ do
@@ -65,11 +69,10 @@ pAbs = parens $ do
   term <- pExpr
   return $ Abs typ name term
   
-  
-  
 pExpr = pAbs <|> pApp <|> pIf <|> pVar 
 
-readExpr :: String -> ThrowsError Term
-readExpr input = case  (parse pExpr "" input) of
-                   Left err -> throwError $ Parser err
-                   Right term -> return term
+readExpr :: String -> StateContext (ThrowsError Term)
+readExpr input =   fmap (runParserT pExpr (return (M.empty, [])) "" input) 
+                   (\x -> case x of
+                       Left err -> throwError $ Parser err
+                       Right term -> return term)
