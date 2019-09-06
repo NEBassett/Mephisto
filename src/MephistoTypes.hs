@@ -16,6 +16,7 @@ import qualified Data.Map as M
 import qualified Control.Lens as L
 import Data.List
 import Control.Monad.Except
+import Text.Parsec
 
 data Constraint = Constraint Type Type
 
@@ -41,6 +42,7 @@ data MError = NoRule Term
             | NoType
             | BadType Type Type
             | BadTypeMsg Type String
+            | Parser ParseError
 
 type ThrowsError = Either MError
 
@@ -95,6 +97,7 @@ showe (BadPredicate m) = "Bad predicate: " ++ (show m)
 showe NoType = "Untyped term"
 showe (BadType m n) = "Bad type, expected: " ++ (show m) ++ ", got: " ++ (show n)
 showe (BadTypeMsg m s) = "Bad type, expected: " ++ s ++ ", got: " ++ (show m)
+showe (Parser m) = "Parser error: " ++ (show m)
 
 getName :: Context -> (String, Bind) -> (String, Bind)
 getName env str = impl env str 0
