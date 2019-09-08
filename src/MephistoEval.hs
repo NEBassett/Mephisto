@@ -1,6 +1,5 @@
 module MephistoEval
   (
-    subst,
     shift,
     outerSubst,
     eval

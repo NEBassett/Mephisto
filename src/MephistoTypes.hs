@@ -86,7 +86,7 @@ showc (Constraint a b) = (show a) ++ " = " ++ (show b)
 
 showt :: Type -> String
 showt (Base a) = showa a
-showt (Func a b) = (showt a) ++ " -> " ++ (showt b)
+showt (Func a b) = "(" ++ (showt a) ++ " -> " ++ (showt b) ++ ")"
 showt (MTuple ms) = "(" ++ (intercalate ", " (fmap showt ms)) ++ ")"
 showt (Sum a b) = (showt a) ++ " + " ++ (showt b)
 showt (TVar s) = s 

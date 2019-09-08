@@ -1,7 +1,8 @@
 module MephistoUnify
   (
     Constraint(..),
-    unify
+    unify,
+    subst
   ) where
 
 import MephistoTypes
