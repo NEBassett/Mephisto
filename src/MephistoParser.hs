@@ -72,7 +72,8 @@ pAtomic = do
   name <- ident
   case (lookup name baseTypes) of
     Just x -> return $ Base x
-    Nothing -> return $ TVar name
+    Nothing -> return $ TVar 0 
+      
 
 pFunc :: MephistoParser Type
 pFunc = fBrackets $ do

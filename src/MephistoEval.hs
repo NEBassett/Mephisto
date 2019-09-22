@@ -8,27 +8,6 @@ module MephistoEval
 import MephistoTypes
 import Control.Monad.Except
 
-shift :: Int -> Term -> Term
-shift d tTerm = recurse 0 tTerm
-  where recurse :: Int -> Term -> Term
-        recurse n term = case term of
-                           Var m -> if (m<n) then term else Var $ m+d
-                           Abs typ str expr -> Abs typ str (recurse (n+1) expr)
-                           App expr0 expr1 -> App (recurse n expr0) (recurse n expr1)
-                           If expr0 expr1 expr2 -> If (recurse n expr0) (recurse n expr1) (recurse n expr2)
-                           val -> val -- its just a dead-end value
-
-subst :: Int -> Term -> Term -> Term
-subst var sub term = recurse 0 term
-  where recurse n term = case term of
-                           Var m -> if (m == (n+var)) then (shift n sub) else term
-                           Abs typ str expr -> Abs typ str (recurse (n+1) expr)
-                           App expr0 expr1 -> App (recurse n expr0) (recurse n expr1)
-                           If expr0 expr1 expr2 -> If (recurse n expr0) (recurse n expr1) (recurse n expr2)
-                           val -> val -- as above, so below
-
-outerSubst sub term = shift (-1) (subst 0 (shift 1 sub) term)
-
 isVal :: Context -> Term -> Bool
 isVal _ (Abs _ _ _) = True
 isVal _ TTrue = True
